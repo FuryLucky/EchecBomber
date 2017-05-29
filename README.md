@@ -5,8 +5,8 @@ Julien VERNA
 
 EchecBomber (web) est un jeu dynamique et technique opposant deux joueurs dans une arène inspirée d'un jeu d'échec à la méthode d'un bomberman.
 
-![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/wireframe/Wireframe-game.PNG "wireframe 1")
-![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/wireframe/Wireframe-gameplay.PNG "wireframe 2")
+![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/Wireframe/Wireframe-game.PNG "wireframe 1")
+![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/Wireframe/Wireframe-gameplay.PNG "wireframe 2")
 
 # Règles
 
@@ -18,11 +18,11 @@ EchecBomber (web) est un jeu dynamique et technique opposant deux joueurs dans u
                                  
 Déplacement :
 
-![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/wireframe/key.png "wireframe 3")
+![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/Wireframe/key.png "wireframe 3")
 
 Rayon d'explosion de chaque bombe :
 
-![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/wireframe/Wireframe-bombs.jpg "wireframe 4")
+![wireframe](https://raw.githubusercontent.com/FuryLucky/EchecBomber/master/Wireframe/Wireframe-bombs.jpg "wireframe 4")
 
 # Outils
 
