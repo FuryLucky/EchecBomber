@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Test</title>
+</head>
+<body>
+<!--=============================================================================================================-->
+<!--===================================================== HTML ==================================================-->
+<!--=============================================================================================================-->
+<aside class="a1"><h1>PLAYER 1</h1><br>
+<img src="img/bomb_pion.png" class="b1 P1b1"><div class="barre"><div class="timePion" id="timePion"></div></div><br>
+<img src="img/bomb_tour.png" class="b1 P1b2"><div class="barre"><div class="timeTour" id="timeTour"></div></div><br>
+<img src="img/bomb_fou.png" class="b1 P1b4"><br>
+<img src="img/bomb_roi.png" class="b1 P1b6"></aside>
+<div class="tabContainer"></div>
+<!--=============================================================================================================-->
+<!--===================================================== CSS ===================================================-->
+<!--=============================================================================================================-->
+<style type="text/css">
+
+html, head, body, div, canvas {margin:0; padding:0; border:0; background-color:black;}
+#main {width:100px; height:100px; position:absolute; background-color:red;}
+canvas {position:absolute; background-color:green;}
+
+aside{position: absolute; border: 1px solid red ;}
+h1{color: red;}
+.a1{padding: 15px 15px; margin-left: 1%; padding-right: 30px; background-color: green;}
+.b1{background-color: #ffffff; border-radius: 100%; border: 3px solid red;}
+
+div.barre{background-color: #ffffff; color: #D1171D; border: 1px solid #370404; border-radius: 3px; height: 15px;  width: 60px; display: inline-block;}
+div.timePion{background-color: cyan; height:100%; width:100%;}
+div.timeTour{background-color: cyan; height:100%; width:100%;}
+
+.bombPion{background-image: url(img/bomb_pion.png);}
+.bombTour{background-image: url(img/bomb_tour.png);}   
+.bombFou{background-image: url(img/bomb_fou.png);}      
+.bombRoi{background-image: url(img/bomb_roi.png);}
+.active{background-image: url(img/player.png);}
+.explosion{background-image: url(img/explosion.gif);}
+
+table{
+  border-collapse: collapse;
+  background-image: url(img/plateau.png);
+  margin-top: 1%;
+  margin-left: 24%;
+}
+table tr td{
+  width: 78px;
+  height: 78px;
+  border: 1px solid red ;
+}
+
+</style>
+<!--=============================================================================================================-->
+<!--================================================= JAVA SCRIPT ===============================================-->
+<!--=============================================================================================================-->
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="js/explosion.js"></script>
+<script type="text/javascript">
+(function(){  //  ANTIHACK  BI*CH
+    var timerPion = 100;
+    var timerTour = 100;
+    var timeDown2 = 0;
+    var timeDown = 0;
+    var rg = 0;
+    var selec = ['img.P1b1','img.P1b2', 'img.P1b4', 'img.P1b6'];
+    var Roi_on_off = 0;
+    var engine = {
+      pos: {x:0, y:0},
+      pos2: {x:7, y:7},
+      tab: {
+        x: 8, 
+        y: 8, 
+        container: $('.tabContainer'),
+        bombs: []
+      },
+    _init: function(){   // INITIALISATION DES FONCTION (load game)   /!\ ne pas toucher /!\
+        this.genTab();
+        this.listener();
+        this.setCell();
+        this.vie();
+    },
+    genTab: function(){   //  CREATION DU PLATEAU    /!\ ne pas toucher /!\
+        var $table = $('<table></table>');
+        for(var x = 0; x < this.tab.x; x++){
+          var $line = $('<tr></tr>');
+          $table.append($line);
+          for(var y = 0; y < this.tab.y; y++){
+            $line.append('<td class="'+x+'-'+y+'"></td>');
+          }
+        }
+        this.tab.container.append($table);
+    },
+    selected: function() {
+        if (rg === 0) {engine.bombPion();};
+        if (rg === 1) {engine.bombTour();};
+        if (rg === 2) {engine.bombFou();};
+        if (rg === 3) {engine.bombRoi();};
+    },
+    down: function() { 
+        $(selec[rg]).css('border', '3px solid red'); 
+        rg++;  
+        $(selec[rg]).css('border', '3px solid blue');
+        if (rg === 4) {
+            rg = 0;
+            $(selec[rg]).css('border', '3px solid blue');
+        }                                
+    },
+    up: function() {
+        $(selec[rg]).css('border', '3px solid red');
+        rg--;
+        $(selec[rg]).css('border', '3px solid blue'); 
+        if (rg === -1) {
+            rg = 3;
+            $(selec[rg]).css('border', '3px solid blue');
+        } 
+    },
+    listener: function(){
+        var me = this;
+        $(document).keydown(function(e){   // DEPLACEMENT
+            if (e.keyCode >= 49 && e.keyCode <= 83) {
+              var pos = [me.pos.x, me.pos.y]; 
+               switch(e.keyCode){
+                  case 83: pos[1]--; break; // left
+                  case 69: pos[0]--; break; // up
+                  case 70: pos[1]++; break; // right
+                  case 68: pos[0]++; break; // down
+                  case 49:  engine.selected(); break;
+                  case 65:  engine.up(); break;
+                  case 81:  engine.down(); break;
+               }
+              me.move(pos[0], pos[1]);
+            };
+        });                                                                  
+    },
+    bombPion: function(x,y) { 
+        var ExTimePion = false;    
+        var posB = $('.'+this.pos.x+'-'+this.pos.y).addClass('bombPion'); 
+        $('img.P1b1').css('background-color', 'red');
+        var posB1x = this.pos.x+1; var posB1y = this.pos.y; var posB1 = $('.'+posB1x+'-'+posB1y); 
+        var posB2x = this.pos.x-1; var posB2y = this.pos.y; var posB2 = $('.'+posB2x+'-'+posB2y);  
+        var posB3x = this.pos.x; var posB3y = this.pos.y+1; var posB3 = $('.'+posB3x+'-'+posB3y); 
+        var posB4x = this.pos.x; var posB4y = this.pos.y-1; var posB4 = $('.'+posB4x+'-'+posB4y);  
+        function ExPion() {
+            timerPion=99,
+            timePion.style.backgroundColor='orange',
+            $('table tr td.bombPion').removeClass('bombPion'), 
+            $(posB).addClass('explosion'),$(posB1).addClass('explosion'),$(posB2).addClass('explosion'),$(posB3).addClass('explosion'),$(posB4).addClass('explosion'),                                           
+            setTimeout(function() {  
+                timerPion=100;
+                timePion.style.backgroundColor='cyan';
+                $('table tr td.explosion').removeClass('explosion'); 
+                $('img.P1b1').css('background-color', '#fff');               
+            }, 600)
+        }
+        timerPion=0;
+        timePion.style.backgroundColor='red';
+        setTimeout(function() { timerPion=33; }, 1000); 
+        setTimeout(function() { timerPion=66; }, 2000);                       
+        var ExTimePion = setTimeout(function() {
+            ExPion(); 
+            console.log("Pion")
+        ; }, 3000); 
+        function stop() {
+            if ($('.bombPion').hasClass('explosion')) {
+                $('table tr td.bombPion').removeClass('bombPion'), 
+                console.log("explodPion")
+                clearTimeout(ExTimePion);
+                ExPion();            
+            }    
+        }setInterval(stop, 50);
+    },
+
+    bombTour: function(x,y) {
+        var ExTimeTour = false;
+        var posB= $('.'+this.pos.x+'-'+this.pos.y).addClass('bombTour'); 
+        var posBy= this.pos.y;
+        var posBx= this.pos.x;
+        function ExTour(){
+            timerTour=99,
+                timeTour.style.backgroundColor='orange',
+                add_class_to_array('explosion', get_explosion_vertical(posBx,posBy)),
+                add_class_to_array('explosion', get_explosion_horizontal(posBx,posBy)),
+                $('table tr td.bombTour').removeClass('bombTour'),
+                setTimeout(function() {  
+                    timerTour=100;
+                    timeTour.style.backgroundColor='cyan';              
+                    $('table tr td.explosion').removeClass('explosion');
+                    $('img.P1b2').css('background-color', '#fff');   
+                }, 600)
+        }
+        $('img.P1b2').css('background-color', 'red'); 
+        timerTour=0;
+        timeTour.style.backgroundColor='red';
+        setTimeout(function() { timerTour=14; }, 1000); 
+        setTimeout(function() { timerTour=28; }, 2000); 
+        setTimeout(function() { timerTour=42; }, 3000);
+        setTimeout(function() { timerTour=56; }, 4000);
+        setTimeout(function() { timerTour=70; }, 5000);
+        setTimeout(function() { timerTour=84; }, 6000);
+        var ExTimeTour = setTimeout(function() {
+            ExTour(); 
+            console.log("Tour")
+        }, 7000); 
+        function stop() {
+            if ($('.bombTour').hasClass('explosion')) {
+                $('table tr td.bombTour').removeClass('bombTour'),
+                console.log("explodTour")
+                clearTimeout(ExTimeTour);
+                ExTimeTour = false;
+                ExTour();   
+            }       
+        }setInterval(stop, 50);
+    }, 
+    bombFou: function(x,y) {
+        var posB = $('.'+this.pos.x+'-'+this.pos.y).addClass('bombFou');
+        var posBy= this.pos.y;
+        var posBx= this.pos.x;
+        $('img.P1b4').css('background-color', 'red');
+        setTimeout(function() {
+          $('table tr td.bombFou').removeClass('bombFou');
+          add_class_to_array('explosion', get_explosion_diagonal(posBx,posBy));
+          setTimeout(function() {              
+            $('table tr td.explosion').removeClass('explosion');
+            $('img.P1b4').css('background-color', '#fff');
+    }, 600);}, 7000); },
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    bombRoi: function(x,y) {     
+      if (Roi_on_off === 0) {
+        $('.'+this.pos.x+'-'+this.pos.y).addClass('bombRoi'); 
+        posBy= this.pos.y;
+        posBx= this.pos.x; 
+        $('img.P1b6').css('background-color', 'red'); 
+        Roi_on_off++;
+        return;
+      }else if (Roi_on_off === 1) {
+        $('.bombRoi').addClass('explosion');
+        add_class_to_array('explosion', get_explosion_square(posBx, posBy)); 
+        setTimeout(function() {       
+          $('table tr td.bombRoi').removeClass('bombRoi');          
+          $('table tr td.explosion').removeClass('explosion');
+          $('img.P1b6').css('background-color', '#fff');
+        }, 600);
+        Roi_on_off--;
+        return;
+      }   
+    },
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    move: function(x,y){   // DEPLACEMENT PERSO  BORDER /!\ ne pas toucher /!\
+        if( x > this.tab.x-1 || x < 0 || y < 0 || y > this.tab.y-1){
+          return;
+        }else{
+          this.pos.x = x;
+          this.pos.y = y;
+        }
+        this.setCell();
+    },
+    setCell: function(){   // DEPLACEMENT IMG PERSO
+        $('table tr td.active').removeClass('active');
+        $('.'+this.pos.x+'-'+this.pos.y).addClass('active');
+        $('active').attr('active');
+    },
+    vie: function(x,y){  
+        if ($('.active').hasClass('explosion')) {
+            console.log("boom!!");
+        } 
+    }
+  }
+    engine._init();  // LANCEMENT DU GAME
+    function refr() {
+        document.getElementById("timePion").innerHTML = timerPion;
+        document.getElementById("timeTour").innerHTML = timerTour;
+        timePion.style.width = timerPion+'%';
+        timeTour.style.width = timerTour+'%';
+    }
+    setInterval(refr, 10);
+    setInterval(engine.vie, 50);
+    
+}).call();  // pour tel, lol nan je dec
+    
+
+</script>
+
+</body>
+</html>
